@@ -10,7 +10,7 @@ pipeline {
     }
     
     parameters {
-        string(name: 'Branch_Name', defaultValue: 'working_sonar_v1.0', description: 'Git Branch to be built')
+        string(name: 'Branch_Name', defaultValue: 'master', description: 'Git Branch to be built')
         booleanParam(name: 'STOP_GRID_AFTER_RUN', defaultValue: false, description: 'Stop Selenium Grid after tests')
     }
 
