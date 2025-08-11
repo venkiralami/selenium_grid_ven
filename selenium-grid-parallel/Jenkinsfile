@@ -51,11 +51,16 @@ pipeline {
         }
         
         stage('Stop Selenium Grid') {
+			echo "Selenium Grid is already running. shutting down grid now.- ${params.STOP_GRID_AFTER_RUN}"
             when {
-                expression { return params.STOP_GRID_AFTER_RUN == true }
+                expression { 
+					 echo "Selenium Grid is already running. shutting down grid now.- ${params.STOP_GRID_AFTER_RUN}"
+					return params.STOP_GRID_AFTER_RUN == true }
             }
             steps {
+				 echo "1 Selenium Grid is already running. shutting down grid now."
 				dir('selenium-grid-parallel') {
+					  echo "2 Selenium Grid is already running. shutting down grid now."
                 sh 'docker-compose down'
                 }
             }
