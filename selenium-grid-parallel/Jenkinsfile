@@ -86,17 +86,7 @@ pipeline {
                     <table border="1" cellpadding="5" cellspacing="0">
                         <tr><th>Test Name</th><th>Status</th><th>Duration (ms)</th></tr>
                 """
-                testngResults.suite.test.class.each { cls ->
-                    cls.test-method.each { method ->
-                        if (method.@isConfig.text() != 'true') { // Skip @Before/@After config methods
-                            def name = method.@name.text()
-                            def status = method.@status.text()
-                            def duration = method.@duration-ms.text()
-                            def color = (status == 'PASS') ? 'green' : (status == 'FAIL' ? 'red' : 'orange')
-                            detailsTable += "<tr><td>${name}</td><td style='color:${color}'>${status}</td><td>${duration}</td></tr>"
-                        }
-                    }
-                }
+                
                 detailsTable += "</table>"
 
                 // Final HTML Email Body
