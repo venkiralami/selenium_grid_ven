@@ -33,22 +33,7 @@ pipeline {
                 }
             }
         }
-        
-		stage('Checkout') {
-            steps {
-                git branch: "${params.Branch_Name}",
-                    url: 'https://github.com/venkiralami/selenium_grid_ven.git',
-                    credentialsId: 'GitHubCredsId'
-            }
-        }
-
-        stage('Build & Test') {
-            steps {
-                dir('selenium-grid-parallel') {
-                    sh 'mvn clean test'
-                }
-            }
-        }
+       
         
         stage('Log Stop Request') {
     		steps {
@@ -73,15 +58,25 @@ pipeline {
     post {
         always {
             script {
+				
+				
                 def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
                 def extentReportPath = "selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html"
 
+// Read and parse TestNG results safely in sandbox
+            def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+            def testngXml = readXML file: reportPath
+             // Extract counts
+            def passed = testngXml.@pass.toString()
+            def failed = testngXml.@fail.toString()
+            def skipped = testngXml.@skip.toString()
+            echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
                 // Parse XML
                 def testngResults = new XmlSlurper().parse(new File(reportPath))
                 def passed  = testngResults.@passed.text()
                 def failed  = testngResults.@failed.text()
                 def skipped = testngResults.@skipped.text()
-
+  			echo "TestNG Results2 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
                 // Build Summary Table
                 def summaryTable = """
                     <h2>TestNG Execution Summary</h2>
