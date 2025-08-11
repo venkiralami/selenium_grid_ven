@@ -37,7 +37,7 @@ pipeline {
 		stage('Checkout') {
             steps {
                 git branch: "${params.Branch_Name}",
-                    url: 'https://github.com/venkiralami/playwright_project_ven.git',
+                    url: 'https://github.com/venkiralami/selenium_grid_ven.git',
                     credentialsId: 'GitHubCredsId'
             }
         }
