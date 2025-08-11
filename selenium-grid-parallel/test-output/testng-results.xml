@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testng-results ignored="0" total="2" passed="2" failed="0" skipped="0">
+  <reporter-output>
+  </reporter-output>
+  <suite started-at="2025-08-11T02:13:34 CDT" name="GridSuite" finished-at="2025-08-11T02:14:08 CDT" duration-ms="33999">
+    <groups>
+    </groups>
+    <test started-at="2025-08-11T02:13:34 CDT" name="ChromeTest" finished-at="2025-08-11T02:13:49 CDT" duration-ms="15283">
+      <class name="tests.GridTest">
+        <test-method is-config="true" signature="setup(java.lang.String)[pri:0, instance:tests.GridTest@6302bbb1]" started-at="2025-08-11T02:13:34 CDT" name="setup" finished-at="2025-08-11T02:13:43 CDT" duration-ms="8202" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[chrome]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="openGoogle()[pri:0, instance:tests.GridTest@6302bbb1]" started-at="2025-08-11T02:13:43 CDT" name="openGoogle" finished-at="2025-08-11T02:13:49 CDT" duration-ms="6366" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- openGoogle -->
+        <test-method is-config="true" signature="teardown(org.testng.ITestResult)[pri:0, instance:tests.GridTest@6302bbb1]" started-at="2025-08-11T02:13:49 CDT" name="teardown" finished-at="2025-08-11T02:13:49 CDT" duration-ms="536" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[TestResult name=openGoogle status=SUCCESS method=GridTest.openGoogle()[pri:0, instance:tests.GridTest@6302bbb1] output={null}]]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- teardown -->
+      </class> <!-- tests.GridTest -->
+    </test> <!-- ChromeTest -->
+    <test started-at="2025-08-11T02:13:34 CDT" name="FirefoxTest" finished-at="2025-08-11T02:14:08 CDT" duration-ms="33999">
+      <class name="tests.GridTest">
+        <test-method is-config="true" signature="setupExtent()[pri:0, instance:tests.GridTest@327514f]" started-at="2025-08-11T02:13:33 CDT" name="setupExtent" finished-at="2025-08-11T02:13:34 CDT" duration-ms="972" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setupExtent -->
+        <test-method is-config="true" signature="setup(java.lang.String)[pri:0, instance:tests.GridTest@327514f]" started-at="2025-08-11T02:13:34 CDT" name="setup" finished-at="2025-08-11T02:13:57 CDT" duration-ms="23116" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[firefox]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- setup -->
+        <test-method signature="openGoogle()[pri:0, instance:tests.GridTest@327514f]" started-at="2025-08-11T02:13:57 CDT" name="openGoogle" finished-at="2025-08-11T02:14:05 CDT" duration-ms="7982" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- openGoogle -->
+        <test-method is-config="true" signature="teardown(org.testng.ITestResult)[pri:0, instance:tests.GridTest@327514f]" started-at="2025-08-11T02:14:05 CDT" name="teardown" finished-at="2025-08-11T02:14:08 CDT" duration-ms="2748" status="PASS">
+          <params>
+            <param index="0">
+              <value>
+                <![CDATA[[TestResult name=openGoogle status=SUCCESS method=GridTest.openGoogle()[pri:0, instance:tests.GridTest@327514f] output={null}]]]>
+              </value>
+            </param>
+          </params>
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- teardown -->
+        <test-method is-config="true" signature="tearDownExtent()[pri:0, instance:tests.GridTest@327514f]" started-at="2025-08-11T02:14:08 CDT" name="tearDownExtent" finished-at="2025-08-11T02:14:10 CDT" duration-ms="1713" status="PASS">
+          <reporter-output>
+          </reporter-output>
+        </test-method> <!-- tearDownExtent -->
+      </class> <!-- tests.GridTest -->
+    </test> <!-- FirefoxTest -->
+  </suite> <!-- GridSuite -->
+</testng-results>

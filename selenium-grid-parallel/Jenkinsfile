@@ -33,7 +33,8 @@ pipeline {
             script {
 				// Read and parse TestNG results safely in sandbox
             def reportPath1 = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
-            def testngXml1 = readXML file: reportPath
+            extentReportPath = "target/extent-reports/GridParallelExtentReport.html"
+            def testngXml1 = readXML file: reportPath1
              // Extract counts
             def passed = testngXml1.@pass.toString()
             def failed = testngXml1.@fail.toString()

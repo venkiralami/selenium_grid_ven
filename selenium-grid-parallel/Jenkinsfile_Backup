@@ -1,0 +1,154 @@
+pipeline {
+    agent any
+
+    environment {
+        GRID_URL = "http://localhost:4444/wd/hub"
+    }
+    tools {
+        maven 'Maven'
+        jdk 'JAVA_HOME'
+    }
+    
+    parameters {
+        string(name: 'Branch_Name', defaultValue: 'master', description: 'Git Branch to be built')
+        booleanParam(name: 'STOP_GRID_AFTER_RUN', defaultValue: false, description: 'Stop Selenium Grid after tests')
+    }
+
+    stages {
+        stage('Check & Start Selenium Grid') {
+            steps {
+                script {
+					dir('selenium-grid-parallel') {
+                    // Check if Selenium Hub is already running
+                    def hubRunning = sh(script: "curl -s ${GRID_URL} | grep 'WebDriverHub'", returnStatus: true) == 0
+
+                    if (!hubRunning) {
+                        echo "Selenium Grid not running. Starting with docker-compose..."
+                        sh 'docker-compose up -d'
+                        sleep 10 // Wait for hub and nodes to initialize
+                    } else {
+                        echo "Selenium Grid is already running. Skipping start."
+                    }
+                    }
+                }
+            }
+        }
+        
+		stage('Checkout') {
+            steps {
+                git branch: "${params.Branch_Name}",
+                    url: 'https://github.com/venkiralami/selenium_grid_ven.git',
+                    credentialsId: 'GitHubCredsId'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                dir('selenium-grid-parallel') {
+                    sh 'mvn clean test'
+                }
+            }
+        }
+        
+        stage('Log Stop Request') {
+    		steps {
+       			 echo "Checking if we need to stop Selenium Grid... STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
+   			 }
+		}
+
+		stage('Stop Selenium Grid') {
+    		when {
+       			 expression { return params.STOP_GRID_AFTER_RUN == true  }
+    		}
+   		 steps {
+        	dir('selenium-grid-parallel') {
+				 echo "Goint to stop STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
+            	sh 'docker-compose down'
+        		}
+    		}
+		}
+        
+    }
+
+    post {
+        always {
+            script {
+				
+				
+                def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+                def extentReportPath = "selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html"
+
+// Read and parse TestNG results safely in sandbox
+            def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+            def testngXml = readXML file: reportPath
+             // Extract counts
+            def passed = testngXml.@pass.toString()
+            def failed = testngXml.@fail.toString()
+            def skipped = testngXml.@skip.toString()
+            echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
+                // Parse XML
+                def testngResults = new XmlSlurper().parse(new File(reportPath))
+                def passed  = testngResults.@passed.text()
+                def failed  = testngResults.@failed.text()
+                def skipped = testngResults.@skipped.text()
+  			echo "TestNG Results2 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
+                // Build Summary Table
+                def summaryTable = """
+                    <h2>TestNG Execution Summary</h2>
+                    <table border="1" cellpadding="5" cellspacing="0">
+                        <tr><th>Passed</th><th>Failed</th><th>Skipped</th></tr>
+                        <tr>
+                            <td style='color:green'>${passed}</td>
+                            <td style='color:red'>${failed}</td>
+                            <td style='color:orange'>${skipped}</td>
+                        </tr>
+                    </table>
+                """
+
+                // Build Detailed Results Table
+                def detailsTable = """
+                    <h3>Detailed Test Results</h3>
+                    <table border="1" cellpadding="5" cellspacing="0">
+                        <tr><th>Test Name</th><th>Status</th><th>Duration (ms)</th></tr>
+                """
+                testngResults.suite.test.class.each { cls ->
+                    cls.test-method.each { method ->
+                        if (method.@isConfig.text() != 'true') { // Skip @Before/@After config methods
+                            def name = method.@name.text()
+                            def status = method.@status.text()
+                            def duration = method.@duration-ms.text()
+                            def color = (status == 'PASS') ? 'green' : (status == 'FAIL' ? 'red' : 'orange')
+                            detailsTable += "<tr><td>${name}</td><td style='color:${color}'>${status}</td><td>${duration}</td></tr>"
+                        }
+                    }
+                }
+                detailsTable += "</table>"
+
+                // Final HTML Email Body
+                def emailBody = """
+                    ${summaryTable}
+                    ${detailsTable}
+                    <br>
+                    <a href="${env.BUILD_URL}artifact/${extentReportPath}">📊 View Full ExtentReport</a>
+                    <br><br>
+                    Jenkins Build: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
+                """
+
+                // Send Email
+                emailext(
+                    subject: "Test Execution Report - ${currentBuild.currentResult}",
+                    body: emailBody,
+                    to: "venki.ralami@gmail.com",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+
+        success {
+            // Archive ExtentReport so email link works
+            archiveArtifacts artifacts: 'selenium-grid-parallel/target/extent-reports/**', fingerprint: true
+        }
+    }
+    
+     
+}
