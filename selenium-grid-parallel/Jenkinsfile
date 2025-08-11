@@ -15,24 +15,7 @@ pipeline {
     }
 
     stages {
-        stage('Check & Start Selenium Grid') {
-            steps {
-                script {
-					dir('selenium-grid-parallel') {
-                    // Check if Selenium Hub is already running
-                    def hubRunning = sh(script: "curl -s ${GRID_URL} | grep 'WebDriverHub'", returnStatus: true) == 0
-
-                    if (!hubRunning) {
-                        echo "Selenium Grid not running. Starting with docker-compose..."
-                        sh 'docker-compose up -d'
-                        sleep 10 // Wait for hub and nodes to initialize
-                    } else {
-                        echo "Selenium Grid is already running. Skipping start."
-                    }
-                    }
-                }
-            }
-        }
+        
        
         
         stage('Log Stop Request') {
