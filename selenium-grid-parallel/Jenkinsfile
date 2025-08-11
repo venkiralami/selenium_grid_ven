@@ -55,7 +55,9 @@ pipeline {
                 expression { return params.STOP_GRID_AFTER_RUN == true }
             }
             steps {
+				dir('selenium-grid-parallel') {
                 sh 'docker-compose down'
+                }
             }
         }
     }
@@ -66,7 +68,7 @@ pipeline {
         always {
             script {
                 // Read TestNG report (summary only)
-                def reportPath = "target/surefire-reports/testng-results.xml"
+                def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
                 def testSummary = sh(script: """
                     passed=\$(grep -o 'pass="[^"]*"' ${reportPath} | cut -d '"' -f2)
                     failed=\$(grep -o 'fail="[^"]*"' ${reportPath} | cut -d '"' -f2)
