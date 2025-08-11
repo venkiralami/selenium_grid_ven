@@ -58,19 +58,19 @@ pipeline {
     post {
         always {
             script {
-				
+				// Read and parse TestNG results safely in sandbox
+            def reportPath1 = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+            def testngXml1 = readXML file: reportPath
+             // Extract counts
+            def passed1 = testngXml1.@pass.toString()
+            def failed1 = testngXml1.@fail.toString()
+            def skipped1 = testngXml1.@skip.toString()
+            echo "TestNG Results1 - Passed: ${passed1}, Failed: ${failed1}, Skipped: ${skipped1}"
 				
                 def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
                 def extentReportPath = "selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html"
 
-// Read and parse TestNG results safely in sandbox
-            def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
-            def testngXml = readXML file: reportPath
-             // Extract counts
-            def passed = testngXml.@pass.toString()
-            def failed = testngXml.@fail.toString()
-            def skipped = testngXml.@skip.toString()
-            echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
+
                 // Parse XML
                 def testngResults = new XmlSlurper().parse(new File(reportPath))
                 def passed  = testngResults.@passed.text()
