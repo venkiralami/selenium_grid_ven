@@ -18,6 +18,7 @@ pipeline {
         stage('Check & Start Selenium Grid') {
             steps {
                 script {
+					dir('selenium-grid-parallel') {
                     // Check if Selenium Hub is already running
                     def hubRunning = sh(script: "curl -s ${GRID_URL} | grep 'WebDriverHub'", returnStatus: true) == 0
 
@@ -27,6 +28,7 @@ pipeline {
                         sleep 10 // Wait for hub and nodes to initialize
                     } else {
                         echo "Selenium Grid is already running. Skipping start."
+                    }
                     }
                 }
             }
