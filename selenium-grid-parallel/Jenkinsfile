@@ -1,0 +1,68 @@
+pipeline {
+    agent any
+
+    environment {
+        GRID_URL = "http://localhost:4444/wd/hub"
+    }
+
+    stages {
+        stage('Check & Start Selenium Grid') {
+            steps {
+                script {
+                    // Check if Selenium Hub is already running
+                    def hubRunning = sh(script: "curl -s ${GRID_URL} | grep 'WebDriverHub'", returnStatus: true) == 0
+
+                    if (!hubRunning) {
+                        echo "Selenium Grid not running. Starting with docker-compose..."
+                        sh 'docker-compose up -d'
+                        sleep 10 // Wait for hub and nodes to initialize
+                    } else {
+                        echo "Selenium Grid is already running. Skipping start."
+                    }
+                }
+            }
+        }
+
+        stage('Run Tests') {
+            steps {
+                sh 'mvn clean test'
+            }
+        }
+
+        stage('Stop Selenium Grid') {
+            when {
+                expression { return params.STOP_GRID_AFTER_RUN == true }
+            }
+            steps {
+                sh 'docker-compose down'
+            }
+        }
+    }
+
+    parameters {
+        booleanParam(name: 'STOP_GRID_AFTER_RUN', defaultValue: false, description: 'Stop Selenium Grid after tests')
+    }
+    
+     post {
+        always {
+            script {
+                // Read TestNG report (summary only)
+                def reportPath = "target/surefire-reports/testng-results.xml"
+                def testSummary = sh(script: """
+                    passed=\$(grep -o 'pass="[^"]*"' ${reportPath} | cut -d '"' -f2)
+                    failed=\$(grep -o 'fail="[^"]*"' ${reportPath} | cut -d '"' -f2)
+                    skipped=\$(grep -o 'skip="[^"]*"' ${reportPath} | cut -d '"' -f2)
+                    echo "<h2>TestNG Execution Summary</h2>
+                          <p>Passed: \$passed<br>Failed: \$failed<br>Skipped: \$skipped</p>"
+                """, returnStdout: true).trim()
+
+                emailext(
+                    subject: "Test Execution Report - ${currentBuild.currentResult}",
+                    body: "${testSummary}<br><br>Full report is available in Jenkins.",
+                    to: "team@example.com",
+                    mimeType: 'text/html'
+                )
+            }
+        }
+    }
+}
