@@ -30,7 +30,7 @@ public class GridTest {
     @BeforeSuite(alwaysRun = true)
     public void setupExtent() {
         if (extent == null) {
-            ExtentSparkReporter reporter = new ExtentSparkReporter("target/GridParallelReport.html");
+            ExtentSparkReporter reporter = new ExtentSparkReporter("target/extent-reports/GridParallelExtentReport.html");
             extent = new ExtentReports();
             extent.attachReporter(reporter);
         }
