@@ -50,21 +50,24 @@ pipeline {
             }
         }
         
-        stage('Stop Selenium Grid') {
-			echo "1 Selenium Grid is already running. shutting down grid now.- ${params.STOP_GRID_AFTER_RUN}"
-            when {
-                expression { 
-					 
-					return params.STOP_GRID_AFTER_RUN == true }
-            }
-            steps {
-				 
-				dir('selenium-grid-parallel') {
-					echo "2 Selenium Grid is already running. shutting down grid now.- ${params.STOP_GRID_AFTER_RUN}"
-                sh 'docker-compose down'
-                }
-            }
-        }
+        stage('Log Stop Request') {
+    		steps {
+       			 echo "Checking if we need to stop Selenium Grid... STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
+   			 }
+		}
+
+		stage('Stop Selenium Grid') {
+    		when {
+       			 expression { return params.STOP_GRID_AFTER_RUN == true  }
+    		}
+   		 steps {
+        	dir('selenium-grid-parallel') {
+				 echo "Goint to stop STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
+            	sh 'docker-compose down'
+        		}
+    		}
+		}
+        
     }
 
    
