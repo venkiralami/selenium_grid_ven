@@ -37,7 +37,7 @@ pipeline {
         def xmlContent = readFile(reportPath)
 
         // Non-CPS method to safely parse XML in Jenkins pipeline
-        @NonCPS
+       // @NonCPS
         def parseTestNGResults(String xmlText) {
           def parser = new XmlParser()
           def root = parser.parseText(xmlText)
