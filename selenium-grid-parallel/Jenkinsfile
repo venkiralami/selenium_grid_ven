@@ -4,6 +4,15 @@ pipeline {
     environment {
         GRID_URL = "http://localhost:4444/wd/hub"
     }
+    tools {
+        maven 'Maven'
+        jdk 'JAVA_HOME'
+    }
+    
+    parameters {
+        string(name: 'Branch_Name', defaultValue: 'working_sonar_v1.0', description: 'Git Branch to be built')
+        booleanParam(name: 'STOP_GRID_AFTER_RUN', defaultValue: false, description: 'Stop Selenium Grid after tests')
+    }
 
     stages {
         stage('Check & Start Selenium Grid') {
@@ -22,13 +31,23 @@ pipeline {
                 }
             }
         }
-
-        stage('Run Tests') {
+        
+		stage('Checkout') {
             steps {
-                sh 'mvn clean test'
+                git branch: "${params.Branch_Name}",
+                    url: 'https://github.com/venkiralami/playwright_project_ven.git',
+                    credentialsId: 'GitHubCredsId'
             }
         }
 
+        stage('Build & Test') {
+            steps {
+                dir('selenium-grid-parallel') {
+                    sh 'mvn clean test'
+                }
+            }
+        }
+        
         stage('Stop Selenium Grid') {
             when {
                 expression { return params.STOP_GRID_AFTER_RUN == true }
@@ -39,9 +58,7 @@ pipeline {
         }
     }
 
-    parameters {
-        booleanParam(name: 'STOP_GRID_AFTER_RUN', defaultValue: false, description: 'Stop Selenium Grid after tests')
-    }
+   
     
      post {
         always {
@@ -59,7 +76,7 @@ pipeline {
                 emailext(
                     subject: "Test Execution Report - ${currentBuild.currentResult}",
                     body: "${testSummary}<br><br>Full report is available in Jenkins.",
-                    to: "team@example.com",
+                    to: "venki.ralami@gmail.com",
                     mimeType: 'text/html'
                 )
             }
