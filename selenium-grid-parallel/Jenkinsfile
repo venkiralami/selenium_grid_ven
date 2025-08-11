@@ -29,26 +29,19 @@ pipeline {
     }
 
     post {
-  always {
-    script {
-      def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+    always {
+      script {
+        def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
 
-      if (fileExists(reportPath)) {
-        def xmlContent = readFile(reportPath)
-
-        // Non-CPS method to safely parse XML in Jenkins pipeline
-       // @NonCPS
-        def parseTestNGResults(String xmlText) {
+        def parseTestNGResults = { String xmlText ->
           def parser = new XmlParser()
           def root = parser.parseText(xmlText)
 
-          // Attributes on <testng-results>
           def total = root.@total as int
           def passed = root.@passed as int
           def failed = root.@failed as int
           def skipped = root.@skipped as int
 
-          // Collect failed and skipped test methods
           def failedTests = []
           def skippedTests = []
 
@@ -75,32 +68,34 @@ pipeline {
           ]
         }
 
-        def results = parseTestNGResults(xmlContent)
+        if (fileExists(reportPath)) {
+          def xmlContent = readFile(reportPath)
+          def results = parseTestNGResults(xmlContent)
 
-        def testSummary = """
-          <h2>TestNG Execution Summary</h2>
-          <p>Total: ${results.total}<br>
-             Passed: ${results.passed}<br>
-             Failed: ${results.failed}<br>
-             Skipped: ${results.skipped}</p>
-          <h3>Failed Tests:</h3>
-          <ul>${results.failedTests.collect { "<li>${it}</li>" }.join('')}</ul>
-          <h3>Skipped Tests:</h3>
-          <ul>${results.skippedTests.collect { "<li>${it}</li>" }.join('')}</ul>
-        """
+          def testSummary = """
+            <h2>TestNG Execution Summary</h2>
+            <p>Total: ${results.total}<br>
+               Passed: ${results.passed}<br>
+               Failed: ${results.failed}<br>
+               Skipped: ${results.skipped}</p>
+            <h3>Failed Tests:</h3>
+            <ul>${results.failedTests.collect { "<li>${it}</li>" }.join('')}</ul>
+            <h3>Skipped Tests:</h3>
+            <ul>${results.skippedTests.collect { "<li>${it}</li>" }.join('')}</ul>
+          """
 
-        emailext(
-          subject: "Test Execution Report - ${currentBuild.currentResult}",
-          body: testSummary + "<br><br>Full report available in Jenkins.",
-          to: "venki.ralami@gmail.com",
-          mimeType: 'text/html'
-        )
-      } else {
-        echo "⚠ TestNG report not found at: ${reportPath}"
+          emailext(
+            subject: "Test Execution Report - ${currentBuild.currentResult}",
+            body: testSummary + "<br><br>Full report available in Jenkins.",
+            to: "venki.ralami@gmail.com",
+            mimeType: 'text/html'
+          )
+        } else {
+          echo "⚠ TestNG report not found at: ${reportPath}"
+        }
       }
     }
   }
-}
     
      
 }
