@@ -41,17 +41,7 @@ pipeline {
    			 }
 		}
 
-		stage('Stop Selenium Grid') {
-    		when {
-       			 expression { return params.STOP_GRID_AFTER_RUN == true  }
-    		}
-   		 steps {
-        	dir('selenium-grid-parallel') {
-				 echo "Goint to stop STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
-            	sh 'docker-compose down'
-        		}
-    		}
-		}
+		
         
     }
 
@@ -72,7 +62,7 @@ pipeline {
 
 
                 // Parse XML
-                def testngResults = new XmlSlurper().parse(new File(reportPath))
+                def testngResults = readXML file: reportPath
                 def passed  = testngResults.@passed.text()
                 def failed  = testngResults.@failed.text()
                 def skipped = testngResults.@skipped.text()
