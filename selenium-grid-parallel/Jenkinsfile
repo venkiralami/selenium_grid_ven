@@ -36,7 +36,7 @@ pipeline {
      post {
         always {
             script {
-                // Read the XML file as plain text
+				 // Read the XML file as plain text
                 def xmlContent = readFile 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
 
                 // Extract numbers using regex — no XmlSlurper, no sandbox approval
@@ -61,6 +61,72 @@ pipeline {
                     subject: "TestNG Results - Build #${env.BUILD_NUMBER}",
                     body: body,
                     to: 'venki.ralami@gmail.com'
+                )
+            
+				
+                def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+                def extentReportPath = "selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html"
+
+// Read and parse TestNG results safely in sandbox
+            def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+            def testngXml = readXML file: reportPath
+             // Extract counts
+            def passed = testngXml.@pass.toString()
+            def failed = testngXml.@fail.toString()
+            def skipped = testngXml.@skip.toString()
+            echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
+                // Parse XML
+                def testngResults = testngXml
+               
+  			echo "TestNG Results2 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
+                // Build Summary Table
+                def summaryTable = """
+                    <h2>TestNG Execution Summary</h2>
+                    <table border="1" cellpadding="5" cellspacing="0">
+                        <tr><th>Passed</th><th>Failed</th><th>Skipped</th></tr>
+                        <tr>
+                            <td style='color:green'>${passed}</td>
+                            <td style='color:red'>${failed}</td>
+                            <td style='color:orange'>${skipped}</td>
+                        </tr>
+                    </table>
+                """
+
+                // Build Detailed Results Table
+                def detailsTable = """
+                    <h3>Detailed Test Results</h3>
+                    <table border="1" cellpadding="5" cellspacing="0">
+                        <tr><th>Test Name</th><th>Status</th><th>Duration (ms)</th></tr>
+                """
+                testngResults.suite.test.class.each { cls ->
+                    cls.test-method.each { method ->
+                        if (method.@isConfig.text() != 'true') { // Skip @Before/@After config methods
+                            def name = method.@name.text()
+                            def status = method.@status.text()
+                            def duration = method.@duration-ms.text()
+                            def color = (status == 'PASS') ? 'green' : (status == 'FAIL' ? 'red' : 'orange')
+                            detailsTable += "<tr><td>${name}</td><td style='color:${color}'>${status}</td><td>${duration}</td></tr>"
+                        }
+                    }
+                }
+                detailsTable += "</table>"
+
+                // Final HTML Email Body
+                def emailBody = """
+                    ${summaryTable}
+                    ${detailsTable}
+                    <br>
+                    <a href="${env.BUILD_URL}artifact/${extentReportPath}">📊 View Full ExtentReport</a>
+                    <br><br>
+                    Jenkins Build: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
+                """
+
+                // Send Email
+                emailext(
+                    subject: "Test Execution Report - ${currentBuild.currentResult}",
+                    body: emailBody,
+                    to: "venki.ralami@gmail.com",
+                    mimeType: 'text/html'
                 )
             }
         }
