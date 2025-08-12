@@ -103,6 +103,7 @@ pipeline {
                     body: emailBody,
                     to: "venki.ralami@gmail.com",
                     mimeType: 'text/html'
+                    attachmentsPattern: 'selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html'
                 )
             }
         }
