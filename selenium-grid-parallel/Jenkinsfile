@@ -54,7 +54,7 @@ pipeline {
                 def summaryTable = """
                     <h2>TestNG Execution Summary</h2>
                     <table border="1" cellpadding="5" cellspacing="0">
-                        <tr><th>Passed</th><th>Failed</th><th>Skipped</th></tr>
+                        <tr><th>Total</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Ignored</th></tr>
                         <tr>
                         	<td style='color:blue'>${total}</td>
                             <td style='color:green'>${passed}</td>
@@ -68,10 +68,12 @@ pipeline {
                 // Combine summary and full report for email body
                 def emailBody = """
                     ${summaryTable}
-                    <br><hr><br>
-                     Build URL: ${env.BUILD_URL}
+                    <br><hr><br>                    
                      Jenkins Build URL: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
                      <br><hr><br>
+                     <br><br>
+    					📊	<a href="${env.BUILD_URL}artifact/selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html">View Full Extent Report</a>
+    				<br><br>
                      Extent Report: 
                      <br><hr><br>
                     ${extentReportHtml}
