@@ -67,15 +67,15 @@ pipeline {
 
                 // Combine summary and full report for email body
                 def emailBody = """
+                   <br><hr><br>  
                     ${summaryTable}
-                    <br><hr><br>                    
+                    <br><br>                    
                      Jenkins Build URL: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
-                     <br><hr><br>
-                     <br><br>
-    					📊	<a href="${env.BUILD_URL}artifact/selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html">View Full Extent Report</a>
+                    <br><br>
+    				Extent Report: 📊<a href="${env.BUILD_URL}artifact/selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html">View Full Extent Report</a>
     				<br><br>
-                     Extent Report: 
-                     <br><hr><br>
+                     Extent Report Content: 
+                     <br><br>
                     ${extentReportHtml}
                     <br><hr><br>
                     
