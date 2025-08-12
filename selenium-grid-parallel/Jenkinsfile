@@ -65,14 +65,9 @@ pipeline {
             
 				
                 def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
-                def extentReportPath = "selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html"
+                def extentReportHtml = readFile file: extentReportPath
 
-// Read and parse TestNG results safely in sandbox
-            
-           
-               
-  			echo "TestNG Results2 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
-                // Build Summary Table
+                // Compose summary table HTML for email
                 def summaryTable = """
                     <h2>TestNG Execution Summary</h2>
                     <table border="1" cellpadding="5" cellspacing="0">
@@ -85,26 +80,26 @@ pipeline {
                     </table>
                 """
 
-                
-
-                // Final HTML Email Body
+                // Combine summary and full report for email body
                 def emailBody = """
                     ${summaryTable}
-                   
-                    <br>
-                    <a href="${env.BUILD_URL}artifact/${extentReportPath}">📊 View Full ExtentReport</a>
-                    <br><br>
-                    Jenkins Build: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
+                    <br><hr><br>
+                    ${extentReportHtml}
+                    <br><hr><br>
+                    Jenkins Build URL: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
                 """
 
                 // Send Email
                 emailext(
-                    subject: "Test Execution Report - ${currentBuild.currentResult}",
+                    subject: "Test Execution Report - - Build #${env.BUILD_NUMBER} :: ${currentBuild.currentResult}",
                     body: emailBody,
                     to: "venki.ralami@gmail.com",
                     mimeType: 'text/html',
                     attachmentsPattern: 'selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html'
                 )
+                
+                  // Archive the ExtentReport artifact
+            archiveArtifacts artifacts: 'selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html', fingerprint: true
             }
         }
     }
