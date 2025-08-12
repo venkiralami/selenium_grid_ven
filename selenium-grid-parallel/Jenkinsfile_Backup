@@ -73,7 +73,33 @@ pipeline {
     post {
         always {
             script {
-				
+				 // Read the XML file as plain text
+                def xmlContent = readFile 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
+
+                // Extract numbers using regex — no XmlSlurper, no sandbox approval
+                def total = (xmlContent =~ /total="(\d+)"/)[0][1]
+                def passed = (xmlContent =~ /passed="(\d+)"/)[0][1]
+                def failed = (xmlContent =~ /failed="(\d+)"/)[0][1]
+                def skipped = (xmlContent =~ /skipped="(\d+)"/)[0][1]
+
+                // Prepare the email body
+                def body = """
+                TestNG Results:
+
+                Total:   ${total}
+                Passed:  ${passed}
+                Failed:  ${failed}
+                Skipped: ${skipped}
+
+                Build URL: ${env.BUILD_URL}
+                """
+
+                emailext(
+                    subject: "TestNG Results - Build #${env.BUILD_NUMBER}",
+                    body: body,
+                    to: 'venki.ralami@gmail.com'
+                )
+            
 				
                 def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
                 def extentReportPath = "selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html"
@@ -87,10 +113,8 @@ pipeline {
             def skipped = testngXml.@skip.toString()
             echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
                 // Parse XML
-                def testngResults = new XmlSlurper().parse(new File(reportPath))
-                def passed  = testngResults.@passed.text()
-                def failed  = testngResults.@failed.text()
-                def skipped = testngResults.@skipped.text()
+                def testngResults = testngXml
+               
   			echo "TestNG Results2 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
                 // Build Summary Table
                 def summaryTable = """
