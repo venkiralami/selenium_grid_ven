@@ -25,23 +25,7 @@ pipeline {
    			 }
 		}
 		 
-         stage('Parse XML without readXML') {
-            steps {
-                script {
-                    def xmlText = readFile 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'// Read raw XML from workspace file
-                    def root = new XmlSlurper().parseText(xmlText)
-
-                    // Example: access elements
-                    def nameValue = root.name.text()
-                    echo "Name from XML: ${nameValue}"
-
-                    // Iterate over elements
-                    root.items.item.each { item ->
-                        echo "Item: ${item.text()}"
-                    }
-                }
-            }
-        }
+         
 
 		
         
@@ -49,5 +33,36 @@ pipeline {
 
    
     
-     
+     post {
+        always {
+            script {
+                // Read the XML file as plain text
+                def xmlContent = readFile 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
+
+                // Extract numbers using regex — no XmlSlurper, no sandbox approval
+                def total = (xmlContent =~ /total="(\d+)"/)[0][1]
+                def passed = (xmlContent =~ /passed="(\d+)"/)[0][1]
+                def failed = (xmlContent =~ /failed="(\d+)"/)[0][1]
+                def skipped = (xmlContent =~ /skipped="(\d+)"/)[0][1]
+
+                // Prepare the email body
+                def body = """
+                TestNG Results:
+
+                Total:   ${total}
+                Passed:  ${passed}
+                Failed:  ${failed}
+                Skipped: ${skipped}
+
+                Build URL: ${env.BUILD_URL}
+                """
+
+                emailext(
+                    subject: "TestNG Results - Build #${env.BUILD_NUMBER}",
+                    body: body,
+                    to: 'your.email@example.com'
+                )
+            }
+        }
+    }
 }
