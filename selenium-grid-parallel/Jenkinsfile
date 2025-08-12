@@ -30,11 +30,13 @@ pipeline {
                 script {
                     def xmlPath = 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
 
-                    // Read XML as a String (safe in sandbox)
-                    def xmlContent = readFile(xmlPath)
+ // Read XML file from workspace
+                    def results = readXML file: 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
 
-                    // Use XmlSlurper in a sandbox-friendly way
-                    def results = new groovy.xml.XmlSlurper(false, false).parseText(xmlContent)
+                    echo "Total Tests: ${results.'@total'}"
+                    echo "Passed: ${results.'@passed'}"
+                    echo "Failed: ${results.'@failed'}"
+                   
 
                     def total   = results.@total.toInteger()
                     def passed  = results.@passed.toInteger()
@@ -53,74 +55,7 @@ pipeline {
         
     }
 
-    post {
-    always {
-      script {
-        def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
-
-        def parseTestNGResults = { String xmlText ->
-          def parser = new XmlParser()
-          def root = parser.parseText(xmlText)
-
-          def total = root.@total as int
-          def passed = root.@passed as int
-          def failed = root.@failed as int
-          def skipped = root.@skipped as int
-
-          def failedTests = []
-          def skippedTests = []
-
-          root.suite.test.each { testNode ->
-            testNode.class.each { classNode ->
-              classNode.'test-method'.each { methodNode ->
-                if (methodNode.@status == 'FAIL') {
-                  failedTests << "${classNode.@name}.${methodNode.@name}"
-                }
-                if (methodNode.@status == 'SKIP') {
-                  skippedTests << "${classNode.@name}.${methodNode.@name}"
-                }
-              }
-            }
-          }
-
-          return [
-            total: total,
-            passed: passed,
-            failed: failed,
-            skipped: skipped,
-            failedTests: failedTests,
-            skippedTests: skippedTests
-          ]
-        }
-
-        if (fileExists(reportPath)) {
-          def xmlContent = readFile(reportPath)
-          def results = parseTestNGResults(xmlContent)
-
-          def testSummary = """
-            <h2>TestNG Execution Summary</h2>
-            <p>Total: ${results.total}<br>
-               Passed: ${results.passed}<br>
-               Failed: ${results.failed}<br>
-               Skipped: ${results.skipped}</p>
-            <h3>Failed Tests:</h3>
-            <ul>${results.failedTests.collect { "<li>${it}</li>" }.join('')}</ul>
-            <h3>Skipped Tests:</h3>
-            <ul>${results.skippedTests.collect { "<li>${it}</li>" }.join('')}</ul>
-          """
-
-          emailext(
-            subject: "Test Execution Report - ${currentBuild.currentResult}",
-            body: testSummary + "<br><br>Full report available in Jenkins.",
-            to: "venki.ralami@gmail.com",
-            mimeType: 'text/html'
-          )
-        } else {
-          echo "⚠ TestNG report not found at: ${reportPath}"
-        }
-      }
-    }
-  }
+   
     
      
 }
