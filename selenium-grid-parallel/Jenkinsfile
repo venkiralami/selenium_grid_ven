@@ -69,14 +69,7 @@ pipeline {
 
 // Read and parse TestNG results safely in sandbox
             
-            def testngXml = readXML file: reportPath
-             // Extract counts
-             passed = testngXml.@passed.toString()
-             failed = testngXml.@failed.toString()
-             skipped = testngXml.@skipped.toString()
-            echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
-                // Parse XML
-                def testngResults = testngXml
+           
                
   			echo "TestNG Results2 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
                 // Build Summary Table
@@ -92,29 +85,12 @@ pipeline {
                     </table>
                 """
 
-                // Build Detailed Results Table
-                def detailsTable = """
-                    <h3>Detailed Test Results</h3>
-                    <table border="1" cellpadding="5" cellspacing="0">
-                        <tr><th>Test Name</th><th>Status</th><th>Duration (ms)</th></tr>
-                """
-                testngResults.suite.test.class.each { cls ->
-                    cls.test-method.each { method ->
-                        if (method.@isConfig.text() != 'true') { // Skip @Before/@After config methods
-                            def name = method.@name.text()
-                            def status = method.@status.text()
-                            def duration = method.@duration-ms.text()
-                            def color = (status == 'PASS') ? 'green' : (status == 'FAIL' ? 'red' : 'orange')
-                            detailsTable += "<tr><td>${name}</td><td style='color:${color}'>${status}</td><td>${duration}</td></tr>"
-                        }
-                    }
-                }
-                detailsTable += "</table>"
+                
 
                 // Final HTML Email Body
                 def emailBody = """
                     ${summaryTable}
-                    ${detailsTable}
+                   
                     <br>
                     <a href="${env.BUILD_URL}artifact/${extentReportPath}">📊 View Full ExtentReport</a>
                     <br><br>
