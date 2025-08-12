@@ -71,9 +71,9 @@ pipeline {
             
             def testngXml = readXML file: reportPath
              // Extract counts
-             passed = testngXml.@pass.toString()
-             failed = testngXml.@fail.toString()
-             skipped = testngXml.@skip.toString()
+             passed = testngXml.@passed.toString()
+             failed = testngXml.@failed.toString()
+             skipped = testngXml.@skipped.toString()
             echo "TestNG Results1 - Passed: ${passed}, Failed: ${failed}, Skipped: ${skipped}"
                 // Parse XML
                 def testngResults = testngXml
