@@ -60,7 +60,7 @@ pipeline {
                 emailext(
                     subject: "TestNG Results - Build #${env.BUILD_NUMBER}",
                     body: body,
-                    to: 'your.email@example.com'
+                    to: 'venki.ralami@gmail.com'
                 )
             }
         }
