@@ -90,7 +90,7 @@ pipeline {
 
                 // Compose summary table HTML for email
                 def summaryTable = """
-                    <h2>TestNG Execution Summary</h2>
+                    <h4>TestNG Execution Summary</h4>
                     <table border="1" cellpadding="5" cellspacing="0">
                         <tr><th>Total</th><th>Passed</th><th>Failed</th><th>Skipped</th><th>Ignored</th></tr>
                         <tr>
@@ -108,11 +108,11 @@ pipeline {
                    <br><hr><br>  
                     ${summaryTable}
                     <br><br>                    
-                     Jenkins Build URL: <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
+                    <h4> Jenkins Build URL: </h4> <a href='${env.BUILD_URL}'>${env.BUILD_URL}</a>
                     <br><br>
-    				Extent Report: 📊<a href="${env.BUILD_URL}artifact/selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html">View Full Extent Report</a>
+    				<h4>Extent Report: </h4> 📊<a href="${env.BUILD_URL}artifact/selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html">View Full Extent Report</a>
     				<br><br>
-                     Extent Report Content: 
+                    <h4>Extent Report Content: </h4>
                      <br><br>
                     ${extentReportHtml}
                     <br><hr><br>
