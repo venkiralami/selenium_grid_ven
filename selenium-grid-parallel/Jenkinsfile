@@ -64,7 +64,7 @@ pipeline {
                 )
             
 				
-                def reportPath = "selenium-grid-parallel/target/surefire-reports/testng-results.xml"
+                def extentReportPath = 'selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html'
                 def extentReportHtml = readFile file: extentReportPath
 
                 // Compose summary table HTML for email
