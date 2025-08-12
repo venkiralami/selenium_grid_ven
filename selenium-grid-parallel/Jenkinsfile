@@ -5,6 +5,7 @@ pipeline {
     environment {
         GRID_URL = "http://localhost:4444/wd/hub"
     }
+    
     tools {
         maven 'Maven'
         jdk 'JAVA_HOME'
@@ -16,22 +17,60 @@ pipeline {
     }
 
     stages {
+        stage('Check & Start Selenium Grid') {
+            steps {
+                script {
+					dir('selenium-grid-parallel') {
+                    // Check if Selenium Hub is already running
+                    def hubRunning = sh(script: "curl -s ${GRID_URL} | grep 'WebDriverHub'", returnStatus: true) == 0
+
+                    if (!hubRunning) {
+                        echo "Selenium Grid not running. Starting with docker-compose..."
+                        sh 'docker-compose up -d'
+                        sleep 10 // Wait for hub and nodes to initialize
+                    } else {
+                        echo "Selenium Grid is already running. Skipping start."
+                    }
+                    }
+                }
+            }
+        }
         
-       
+		stage('Checkout') {
+            steps {
+                git branch: "${params.Branch_Name}",
+                    url: 'https://github.com/venkiralami/selenium_grid_ven.git',
+                    credentialsId: 'GitHubCredsId'
+            }
+        }
+
+        stage('Build & Test') {
+            steps {
+                dir('selenium-grid-parallel') {
+                    sh 'mvn clean test'
+                }
+            }
+        }
         
         stage('Log Stop Request') {
     		steps {
        			 echo "Checking if we need to stop Selenium Grid... STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
    			 }
 		}
-		 
-         
 
-		
+		stage('Stop Selenium Grid') {
+    		when {
+       			 expression { return params.STOP_GRID_AFTER_RUN == true  }
+    		}
+   		 steps {
+        	dir('selenium-grid-parallel') {
+				 echo "Goint to stop STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
+            	sh 'docker-compose down'
+        		}
+    		}
+		}
         
     }
-
-   
     
      post {
         always {
@@ -45,8 +84,7 @@ pipeline {
                 def failed = (xmlContent =~ /failed="(\d+)"/)[0][1]
                 def skipped = (xmlContent =~ /skipped="(\d+)"/)[0][1]
 				def ignored = (xmlContent =~ /ignored="(\d+)"/)[0][1]
-                
-				
+                				
                 def extentReportPath = 'selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html'
                 def extentReportHtml = readFile file: extentReportPath
 
