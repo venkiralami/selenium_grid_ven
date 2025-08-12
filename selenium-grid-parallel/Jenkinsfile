@@ -23,6 +23,29 @@ pipeline {
        			 echo "Checking if we need to stop Selenium Grid... STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
    			 }
 		}
+		 stage('Parse TestNG Results') {
+            steps {
+                script {
+                    def xmlPath = 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
+
+                    // Read XML as a String (safe in sandbox)
+                    def xmlContent = readFile(xmlPath)
+
+                    // Use XmlSlurper in a sandbox-friendly way
+                    def results = new groovy.xml.XmlSlurper(false, false).parseText(xmlContent)
+
+                    def total   = results.@total.toInteger()
+                    def passed  = results.@passed.toInteger()
+                    def failed  = results.@failed.toInteger()
+                    def skipped = results.@skipped.toInteger()
+
+                    echo "Total:   ${total}"
+                    echo "Passed:  ${passed}"
+                    echo "Failed:  ${failed}"
+                    echo "Skipped: ${skipped}"
+                }
+            }
+        }
 
 		
         
