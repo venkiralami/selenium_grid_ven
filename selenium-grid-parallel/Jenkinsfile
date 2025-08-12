@@ -24,28 +24,21 @@ pipeline {
        			 echo "Checking if we need to stop Selenium Grid... STOP_GRID_AFTER_RUN - ${params.STOP_GRID_AFTER_RUN}"
    			 }
 		}
-		 stage('Parse TestNG Results') {
+		 
+         stage('Parse XML without readXML') {
             steps {
                 script {
-                    def xmlPath = 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
+                    def xmlText = readFile 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'// Read raw XML from workspace file
+                    def root = new XmlSlurper().parseText(xmlText)
 
- // Read XML file from workspace
-                    def results = readXML file: 'selenium-grid-parallel/target/surefire-reports/testng-results.xml'
+                    // Example: access elements
+                    def nameValue = root.name.text()
+                    echo "Name from XML: ${nameValue}"
 
-                    echo "Total Tests: ${results.'@total'}"
-                    echo "Passed: ${results.'@passed'}"
-                    echo "Failed: ${results.'@failed'}"
-                   
-
-                    def total   = results.@total.toInteger()
-                    def passed  = results.@passed.toInteger()
-                    def failed  = results.@failed.toInteger()
-                    def skipped = results.@skipped.toInteger()
-
-                    echo "Total:   ${total}"
-                    echo "Passed:  ${passed}"
-                    echo "Failed:  ${failed}"
-                    echo "Skipped: ${skipped}"
+                    // Iterate over elements
+                    root.items.item.each { item ->
+                        echo "Item: ${item.text()}"
+                    }
                 }
             }
         }
