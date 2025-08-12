@@ -102,7 +102,7 @@ pipeline {
                     subject: "Test Execution Report - ${currentBuild.currentResult}",
                     body: emailBody,
                     to: "venki.ralami@gmail.com",
-                    mimeType: 'text/html'
+                    mimeType: 'text/html',
                     attachmentsPattern: 'selenium-grid-parallel/target/extent-reports/GridParallelExtentReport.html'
                 )
             }
