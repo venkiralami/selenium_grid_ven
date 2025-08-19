@@ -1,8 +1,8 @@
 version: "3"
 services:
-  selenium-hub:
+  selenium-hub1:
     image: selenium/hub:4.34.0-20250707
-    container_name: selenium-hub
+    container_name: selenium-hub1
     ports:
       - "4444:4444"
 
