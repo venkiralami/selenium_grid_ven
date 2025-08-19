@@ -10,9 +10,9 @@ services:
     image: selenium/node-chrome:4.34.0-20250707
     shm_size: 2gb
     depends_on:
-      - selenium-hub
+      - selenium-hub1
     environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_HOST=selenium-hub1
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
 
@@ -20,8 +20,8 @@ services:
     image: selenium/node-firefox:4.34.0-20250707
     shm_size: 2gb
     depends_on:
-      - selenium-hub
+      - selenium-hub1
     environment:
-      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_HOST=selenium-hub1
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
