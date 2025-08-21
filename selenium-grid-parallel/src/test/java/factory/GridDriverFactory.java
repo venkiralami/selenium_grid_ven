@@ -5,7 +5,7 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import java.net.URL;
 
-public class DriverFactory {
+public class GridDriverFactory {
     public static WebDriver createDriver(String browser) throws Exception {
         URL gridUrl = new URL("http://localhost:4444/wd/hub");
         if (browser.equalsIgnoreCase("chrome")) {

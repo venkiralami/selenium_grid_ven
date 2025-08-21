@@ -20,7 +20,7 @@ import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
 
-import factory.DriverFactory;
+import factory.GridDriverFactory;
 
 public class GridTest {
     WebDriver driver;
@@ -47,13 +47,13 @@ public class GridTest {
     @BeforeMethod(alwaysRun = true)
     public void setup(String browser) throws Exception {
         test = extent.createTest("Test on :: " + browser);
-        driver = DriverFactory.createDriver(browser);
+        driver = GridDriverFactory.createDriver(browser);
     }
 
     @Test
     public void openGoogle() {
         driver.get("https://www.google.com");
-        test.pass("Page title:: " + driver.getTitle());
+        test.pass("Page title :: " + driver.getTitle());
     }
 
     @AfterMethod
